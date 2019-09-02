@@ -1,0 +1,7 @@
+.scannerwork/
+.vscode/
+.idea/
+nbproject/
+*.sublime*
+.DS_Store
+*.iml
