@@ -20,10 +20,6 @@ ldconfig /usr/local/lib
 file_install=$(readlink -f "/resources/install_cassandra.sh")
 [[ -f "${file_install}" ]] || { echo "Error: Could not find Cassandra installation script." ; exit 6 ; }
 
-# Autoconf library file TODO: INSTALL AUTOCONF
-#file_autoconf=$(readlink -f "/usr/bin/autoconf")
-#[[ -f "${file_autoconf}" ]] || { echo "Error: Could not find autoconf installation." ; exit 7 ; }
-
 # Libuv library file
 file_libuv=$(ldconfig -p | awk '/libuv*.so$/{print $NF}')
 [[ -f "${file_libuv}" ]] || { echo "Error: Could not find Libuv library." ; exit 5 ; }

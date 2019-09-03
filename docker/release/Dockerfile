@@ -10,4 +10,4 @@ COPY ./resources .
 
 RUN /resources/zip_cassandra.sh
 
-ENTRYPOINT ["bash"]
+CMD ["bash", "/resources/release.sh", "/resources/cassandra-php-driver.zip"]
