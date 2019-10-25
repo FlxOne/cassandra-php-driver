@@ -1,15 +1,15 @@
 #!/bin/bash
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Returns the element of the array given array. First argument is index, second argument is the array.
 function elementAt() {
-    local arr=("${@:2}")
     local ind=${1:-0}
+    local arr=("${@:2}")
 
-    (( ind > -1 && ind < ${#arr[@]} )) || { echo "" ; return ; }
-
-    echo "${arr[${ind}]}"
+    (( ind > -1 && ind < ${#arr[@]} )) && echo "${arr[${ind}]}"
 }
 
+# Finds the directory of a supported system from a name or returns empty string if system is not supported.
 function getBuildDirForSystem() {
     local systemName="${1}"
     echo $(find "${dirSystems}" -type d -maxdepth 1 -iname "${systemName}")
@@ -30,14 +30,14 @@ selectedSystem=$(getBuildDirForSystem "${1}")
 if [[ "${selectedSystem}" == "" ]]; then
     # If system was supplied but not correct then do not continue
     if [[ "${1}" != "" ]]; then
-        echo "System name '${1}' is not supported."
+        echo "Unsupported or unknown system '${1}'."
         exit 2
     fi
 
     # Ask user to select a system
     selectedSystem=""
     if (( ${#supportedSystems[@]} > 1 )); then
-        echo
+        # Show system list for selection
         for i in "${!supportedSystems[@]}"; do
             system="${supportedSystems[${i}]}"
             echo "$((i+1)). $(basename "${system}")"
