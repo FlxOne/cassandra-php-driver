@@ -22,6 +22,7 @@ read -t 60 -p "Username: " github_user
 [[ -n "${github_user}" ]] || { echo "No GitHub username given." ; exit 1 ; }
 read -t 60 -s -p "Password: " github_pass
 [[ -n "${github_pass}" ]] || { echo "No GitHub password given." ; exit 1 ; }
+echo
 
 function testCmdInstalled() {
     for arg do
