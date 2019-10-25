@@ -1,7 +1,9 @@
 FROM centos:centos6
 
 # Profile setup
-RUN echo "alias ll='ls -al'" >> ~/.bash_profile
+RUN echo $'\n\
+alias ll="ls -al" \n\
+' >> ~/.bash_profile
 
 # Install CentOS yum repositories that are required
 RUN rpm -Uvh \
