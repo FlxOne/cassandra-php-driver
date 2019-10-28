@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Installs Cassandra PHP extension into a CentOS container from the zipped files created by the zip_cassandra.sh script
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 skip_ini=false
 skip_verify=false
@@ -15,8 +16,8 @@ for arg in "${@}"; do
 done
 
 filesExist() {
-    for arg in "${@}"; do
-        [[ -f "${arg}" ]] || { echo "File ${arg} does not exist." ; return 1 ; }
+    for file in "${@}"; do
+        [[ -f "${file}" ]] || { echo "File ${file} does not exist." ; return 1 ; }
     done
     return 0
 }
@@ -26,9 +27,9 @@ php_ini_file=$(php -i | awk '/^Loaded Configuration File/{print $NF}')
 php_extension_dir=$(php -i | awk '/^extension_dir/{print $NF}')
 [[ -d "${php_extension_dir}" ]] || { echo "Unable to retrieve extension directory from PHP installation." ; exit 3 ; }
 
-file_libuv=$(readlink -f "./libuv.so")
-file_cpp_cassandra=$(readlink -f "./libcassandra.so.2")
-file_cassandra_php_ext=$(readlink -f "./cassandra.so")
+file_libuv=$(readlink -f "${dir}/libuv.so")
+file_cpp_cassandra=$(readlink -f "${dir}/libcassandra.so.2")
+file_cassandra_php_ext=$(readlink -f "${dir}/cassandra.so")
 
 # Validate all files exist before starting installation
 filesExist \
@@ -65,7 +66,7 @@ fi
 
 # Verify PHP has Cassandra module
 if [[ ${skip_verify} == false ]]; then
-    [[ $(php -m | grep '^cassandra') != "" ]] || { echo "PHP is missing cassandra module. Installation failed." ; exit 5 ; }
+    [[ $(php -m | grep '^cassandra') != "" ]] || { echo "PHP does not list Cassandra as a loaded extension. Installation failed." ; exit 5 ; }
 fi
 
-echo "Cassandra PHP extension installation successful."
+echo "Cassandra extension for PHP is installed"

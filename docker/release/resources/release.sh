@@ -1,7 +1,7 @@
 #!/bin/bash
 # Uploads a new binary for Cassandra-PHP-Driver as release to the GitHub repo
-
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 [[ -f /proc/1/cgroup ]] && $(grep -q "docker" "/proc/1/cgroup") || { echo "Release script should run inside the Docker container because it requires a proper environment. Aborting.." ; exit 6 ; }
 
 # Command configuration

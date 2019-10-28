@@ -3,7 +3,7 @@ FROM centos:centos8
 # Profile setup
 RUN echo $'\n\
 alias ll="ls -al" \n\
-' >> ~/.bash_profile
+' >> ~/.bashrc
 
 # Install CentOS yum repositories that are required
 RUN dnf install -y -q \
@@ -37,7 +37,11 @@ RUN dnf install -y \
     cmake \
     openssl-devel
 
-# Install PHP build tools required for configuration Cassandra extension
+# Install PHP build tools required for configuration of Cassandra for PHP extension
+RUN dnf module install -y -q php:remi-7.3
+# TODO: Fix install error for repo packacges and remove link to static files
+RUN dnf -y install https://rpmfind.net/linux/fedora/linux/releases/29/Everything/x86_64/os/Packages/l/libedit-3.1-24.20170329cvs.fc29.x86_64.rpm
+RUN dnf -y install https://rpmfind.net/linux/fedora/linux/releases/29/Everything/x86_64/os/Packages/l/libedit-devel-3.1-24.20170329cvs.fc29.x86_64.rpm
 RUN dnf install -y \
     gmp-devel \
     pcre-devel \
