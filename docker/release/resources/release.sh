@@ -1,7 +1,7 @@
 #!/bin/bash
 # Uploads a new binary for Cassandra-PHP-Driver as release to the GitHub repo
-
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 [[ -f /proc/1/cgroup ]] && $(grep -q "docker" "/proc/1/cgroup") || { echo "Release script should run inside the Docker container because it requires a proper environment. Aborting.." ; exit 6 ; }
 
 # Command configuration
@@ -22,6 +22,7 @@ read -t 60 -p "Username: " github_user
 [[ -n "${github_user}" ]] || { echo "No GitHub username given." ; exit 1 ; }
 read -t 60 -s -p "Password: " github_pass
 [[ -n "${github_pass}" ]] || { echo "No GitHub password given." ; exit 1 ; }
+echo
 
 function testCmdInstalled() {
     for arg do

@@ -10,4 +10,5 @@ COPY ./resources .
 
 RUN /resources/zip_cassandra.sh
 
-CMD ["bash", "/resources/release.sh", "/resources/cassandra-php-driver.zip"]
+RUN chmod +x /resources/release.sh
+CMD ["/resources/release.sh", "/resources/cassandra-php-driver.zip"]
