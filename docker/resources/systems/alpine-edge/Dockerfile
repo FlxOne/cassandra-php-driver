@@ -1,56 +1,32 @@
-FROM centos:centos8
+FROM alpine:edge
 
-# Profile setup
-RUN echo $'\n\
-alias ll="ls -al" \n\
-' >> ~/.bashrc
-
-# Install CentOS yum repositories that are required
-RUN dnf install -y -q \
-    https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm \
-    https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+RUN apk upgrade
 
 # Install tools supporting build process
-RUN dnf install -y \
+RUN apk update && apk add --no-cache \
     wget \
-    git
+    git \
+    bash
+
+# Use BASH shell for the rest of the Docker commands
+SHELL ["/bin/bash", "-c"]
 
 # Install C++ dependencies for building Cassandra extension
-RUN dnf install -y \
+RUN apk add --no-cache \
+    build-base \
     automake \
-    binutils \
-    bison \
-    flex \
-    gcc \
-    gcc-c++ \
-    gdb \
-    glibc-devel \
     libtool \
-    make \
-    pkgconf \
-    pkgconf-m4 \
-    pkgconf-pkg-config \
-    redhat-rpm-config \
-    rpm-build \
-    rpm-sign \
-    strace \
     cmake \
-    openssl-devel
+    openssl-dev \
+    gmp-dev
 
-# Install PHP build tools required for configuration of Cassandra for PHP extension
-RUN dnf module install -y -q php:remi-7.3
-# TODO: Fix install error for repo packacges and remove link to static files
-RUN dnf -y install https://rpmfind.net/linux/fedora/linux/releases/29/Everything/x86_64/os/Packages/l/libedit-3.1-24.20170329cvs.fc29.x86_64.rpm
-RUN dnf -y install https://rpmfind.net/linux/fedora/linux/releases/29/Everything/x86_64/os/Packages/l/libedit-devel-3.1-24.20170329cvs.fc29.x86_64.rpm
-RUN dnf install -y \
-    gmp-devel \
-    pcre-devel \
-    php-pear \
-    php-devel
+# Install PHP to test Cassandra installation
+RUN apk add --no-cache \
+    php7 \
+    php7-dev \
+    php7-pear
 
-WORKDIR /tmp
-
-# Install specific autoconf (required for cassandra install)
+# Install autoconf (required for cassandra install)
 RUN wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz \
 && tar xzf autoconf-2.69.tar.gz \
 && find . -maxdepth 1 -type f -name 'autoconf*.tar.gz' -delete \
@@ -62,8 +38,8 @@ RUN wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz \
 || { echo "Failed installing autoconf library." ; exit 1 ; }
 
 # Build libuv (Extract and delete tar, rename dir to 'libuv' and install)
-RUN wget http://dist.libuv.org/dist/v1.8.0/libuv-v1.8.0.tar.gz \
-&& tar xzf libuv-v1.8.0.tar.gz \
+RUN wget http://dist.libuv.org/dist/v1.13.1/libuv-v1.13.1.tar.gz \
+&& tar xzf libuv-v1.13.1.tar.gz \
 && find . -maxdepth 1 -type f -name 'libuv*.tar.gz' -delete \
 && { find . -maxdepth 1 -type d -name '*libuv*' | tail -1; echo 'libuv'; } | xargs -n2 mv \
 && pushd libuv \
@@ -74,17 +50,20 @@ RUN wget http://dist.libuv.org/dist/v1.8.0/libuv-v1.8.0.tar.gz \
 || { echo "Failed installing libuv library." ; exit 2 ; }
 
 # Get Cassandra source code and build the PHP extension (removing '-dev' from version tag)
+WORKDIR /tmp
 RUN git clone --recurse-submodules https://github.com/datastax/php-driver.git \
 && pushd php-driver/ext \
 && sed -i 's/-dev//g' package.xml \
 || { echo "Failed cloning datastax Cassandra PHP driver git repository from GitHub." ; exit 3 ; }
 
 # Build C++ Cassandra (required because it's wrapped by PHP extension)
+# Also remove warnings as errors flag for cmake
 WORKDIR /tmp/php-driver/lib/cpp-driver
-RUN cmake . \
+RUN find . -type f -iname '*.cmake' -exec sed -i "s/ -Werror//" {} \; \
+&& cmake . \
 && make install \
-&& cp /usr/local/lib64/libcassandra.so /usr/lib64/libcassandra.so \
-&& pushd "/usr/lib64/" \
+&& cp libcassandra.so /usr/lib/libcassandra.so \
+&& pushd "/usr/lib/" \
 && ln -s "libcassandra.so" "libcassandra.so.2" \
 || { echo "Failed installing Cassandra C++ library." ; exit 4 ; }
 
@@ -96,5 +75,6 @@ RUN ./configure --with-cassandra=/tmp/php-driver/lib/cpp-driver --with-libdir=li
 # Install Cassandra extension into PHP (these steps are not required but validate the installation of Cassandra)
 RUN pecl install /tmp/php-driver/ext/package.xml
 RUN echo 'extension=cassandra.so' >> $(php -i | awk '/^Loaded Configuration File/{print $NF}')
+RUN php -m | grep -Fxq "cassandra" || { echo "Cassandra module was not loaded by PHP. Installation failed." ; exit 5 ; }
 
 CMD ["/bin/bash"]
