@@ -18,7 +18,8 @@ RUN apk add --no-cache \
     libtool \
     cmake \
     openssl-dev \
-    gmp-dev
+    gmp-dev \
+    autoconf
 
 # Install PHP to test Cassandra installation
 RUN apk add --no-cache \
@@ -26,16 +27,16 @@ RUN apk add --no-cache \
     php7-dev \
     php7-pear
 
-# Install autoconf (required for cassandra install)
-RUN wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz \
-&& tar xzf autoconf-2.69.tar.gz \
-&& find . -maxdepth 1 -type f -name 'autoconf*.tar.gz' -delete \
-&& { find . -maxdepth 1 -type d -name 'autoconf*'; echo 'autoconf'; } | xargs -n2 mv \
-&& pushd autoconf \
-&& ./configure \
-&& make install \
-&& popd \
-|| { echo "Failed installing autoconf library." ; exit 1 ; }
+## Install autoconf (required for cassandra install)
+#RUN wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.gz \
+#&& tar xzf autoconf-2.69.tar.gz \
+#&& find . -maxdepth 1 -type f -name 'autoconf*.tar.gz' -delete \
+#&& { find . -maxdepth 1 -type d -name 'autoconf*'; echo 'autoconf'; } | xargs -n2 mv \
+#&& pushd autoconf \
+#&& ./configure \
+#&& make install \
+#&& popd \
+#|| { echo "Failed installing autoconf library." ; exit 1 ; }
 
 # Build libuv (Extract and delete tar, rename dir to 'libuv' and install)
 RUN wget http://dist.libuv.org/dist/v1.13.1/libuv-v1.13.1.tar.gz \
@@ -76,5 +77,8 @@ RUN ./configure --with-cassandra=/tmp/php-driver/lib/cpp-driver --with-libdir=li
 RUN pecl install /tmp/php-driver/ext/package.xml
 RUN echo 'extension=cassandra.so' >> $(php -i | awk '/^Loaded Configuration File/{print $NF}')
 RUN php -m | grep -Fxq "cassandra" || { echo "Cassandra module was not loaded by PHP. Installation failed." ; exit 5 ; }
+
+# Install zip/install scripts
+COPY /resources/systems/alpine-edge/resources/ /resources
 
 CMD ["/bin/bash"]
