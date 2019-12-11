@@ -6,11 +6,10 @@ libdir="/usr/lib"
 
 zipfiles() {
     for arg in "${@:2}"; do
-        [[ -f "${arg}" ]] || { echo "File ${arg} does not exist." ; return 1 ; }
+        [[ -f "${arg}" ]] || { echo "File $(pwd)/${arg} does not exist." ; return 1 ; }
     done
 
     zip -9 -j "$1" "${@:2}"
-    return $?
 }
 
 copyLibrary() {
@@ -22,7 +21,7 @@ copyLibrary() {
     local lib_file_found=$(find "${libdir}" -type f -iname "${libname}*" | tail -n1)
     [[ -f "${lib_file_found}" ]] || { echo "Could not find library '${libname}' to copy in '${libdir}'." ; return 2 ; }
 
-    mv "$(readlink -f "${lib_file_found}")" "${toDir}/${libname}"
+    cp "$(readlink -f "${lib_file_found}")" "${toDir}/${libname}"
 }
 
 # Register libraries in ldconfig listing
@@ -46,6 +45,9 @@ file_cassandra_php_ext="${php_extensions_dir}/cassandra.so"
 
 # Zip build files of Cassandra
 pushd /resources \
+&& cp "install_cassandra.sh" /tmp \
+&& popd \
+&& pushd /tmp \
 && zipfiles 'cassandra-php-driver.zip' "${file_install}" "${file_cassandra_php_ext}" "libuv.so" "libcassandra.so" "libgmp.so" \
 && popd \
 || { echo "Failed to zip required Cassandra PHP plugin files." ; exit 4 ; }
