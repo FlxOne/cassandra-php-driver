@@ -30,14 +30,13 @@ function installLibrary() {
     pushd /usr/lib \
     && find . \( -type f -o -type l \) -name "${library}*" -delete \
     && mv "${library}" "./" \
-    || { echo "Failed moving library to System library directory." ; popd ; return 1 ; }
+    || { echo "Failed moving library to System library directory." ; return 1 ; }
 
     # Skips first arg.
     # Create symbolic links to other version so that PHP will look for the right file..
     for ext in "${@:2}"; do
-        ln -s "${library}" "${library}${ext}"
+        ln -s "$(basename ${library})" "$(basename ${library})${ext}"
     done
-    popd
 }
 
 php_ini_file=$(php -i | awk '/^Loaded Configuration File/{print $NF}')
