@@ -14,6 +14,6 @@ systemName=$(basename "${releaseSystemDir}")
 
 "../build.sh" "--system" "${systemName}" || { echo "Failed building base image for system '${systemName}'" ; exit 1 ; }
 docker build \
-    --tag="${docker_image}-${systemName}:release" \
+    --tag="${docker_image}:release" \
     -f "${releaseSystemDir}/Dockerfile" \
     "${dir}"

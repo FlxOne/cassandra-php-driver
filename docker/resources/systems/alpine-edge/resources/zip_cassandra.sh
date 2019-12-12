@@ -34,7 +34,7 @@ file_install=$(readlink -f "/resources/install_cassandra.sh")
 
 libs_to_install=('libuv.so' 'libcassandra.so' 'libgmp.so')
 for lib in "${libs_to_install[@]}"; do
-    copyLibrary "${lib}" "/tmp" || { echo "Failed to copy installed library '${lib}' from system files to '/tmp'." ; exit 1 ; }
+    copyLibrary "${lib}" "/resources" || { echo "Failed to copy installed library '${lib}' from system files to '/resources'." ; exit 1 ; }
 done
 
 # Cassandra PHP extension file
@@ -45,9 +45,6 @@ file_cassandra_php_ext="${php_extensions_dir}/cassandra.so"
 
 # Zip build files of Cassandra
 pushd /resources \
-&& cp "install_cassandra.sh" /tmp \
-&& popd \
-&& pushd /tmp \
 && zipfiles 'cassandra-php-driver.zip' "${file_install}" "${file_cassandra_php_ext}" "libuv.so" "libcassandra.so" "libgmp.so" \
 && popd \
 || { echo "Failed to zip required Cassandra PHP plugin files." ; exit 4 ; }

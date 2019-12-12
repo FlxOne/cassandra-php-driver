@@ -6,6 +6,6 @@ source "${dir}/resources/system_select.sh" "${@}" "--store" "system"
 
 echo "Now building Cassandra PHP Driver for $(basename ${system}).."
 docker build \
-    --tag="cassandra-php-driver:base" \
+    --tag="cassandra-php-driver-$(basename ${system}):base" \
     -f "${system}/Dockerfile" \
     "${dir}/.."

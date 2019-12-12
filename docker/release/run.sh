@@ -9,5 +9,4 @@ docker container rm "${docker_container}" &> /dev/null && echo "Removed old ${do
 docker run \
     -it \
     --name "${docker_container}" \
-    "${docker_image}" \
-    "/bin/bash"
+    "${docker_image}"
