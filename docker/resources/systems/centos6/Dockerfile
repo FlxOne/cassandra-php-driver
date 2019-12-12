@@ -74,8 +74,11 @@ WORKDIR /tmp/php-driver/ext
 RUN phpize
 RUN ./configure --with-cassandra=/tmp/php-driver/lib/cpp-driver --with-libdir=lib
 
-# Install Cassandra extension into PHP (these steps are not required but useful for testing)
+# Install Cassandra extension into PHP (these steps are not required but validate the installation of Cassandra)
 RUN pecl install /tmp/php-driver/ext/package.xml
 RUN echo 'extension=cassandra.so' >> $(php -i | awk '/^Loaded Configuration File/{print $NF}')
+
+# Install zip/install scripts
+COPY /resources/systems/centos6/resources/ /resources
 
 CMD ["/bin/bash"]
