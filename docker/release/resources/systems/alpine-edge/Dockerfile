@@ -10,4 +10,4 @@ COPY ./**.sh .
 RUN ./zip_cassandra.sh
 
 RUN chmod +x release.sh
-#CMD ["release.sh", "cassandra-php-driver.zip"]
+CMD ["release.sh", "cassandra-php-driver.zip"]
